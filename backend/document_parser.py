@@ -60,7 +60,8 @@ class EntityExtractor:
         patterns = [
             r'(?:paid[\s-]?up|authorized)\s+capital[:\s]+(?:QAR|qar)?\s*([\d,]+(?:\.\d+)?)',
             r'capital[:\s]+(?:QAR|qar)?\s*([\d,]+(?:\.\d+)?)',
-            r'QAR\s*([\d,]+(?:\.\d+)?).*?(?:paid[\s-]?up|authorized|capital)'
+            r'QAR\s*([\d,]+(?:\.\d+)?).*?(?:paid[\s-]?up|authorized|capital)',
+            r'(?:QAR|qar)\s*([\d,]+(?:\.\d+)?)\s*\([^)]*(?:million|riyal)[^)]*\)'  # Matches "QAR 5,000,000 (Five Million)"
         ]
         
         capital_info = {
@@ -74,11 +75,15 @@ class EntityExtractor:
                 amount_str = match.group(1).replace(',', '')
                 try:
                     amount = float(amount_str)
+                    # Only accept amounts in realistic capital range (> 100,000 QAR)
+                    if amount < 100000:
+                        continue
                     if 'paid' in match.group(0).lower():
                         capital_info['paid_up_capital'] = amount
                     elif 'authorized' in match.group(0).lower():
                         capital_info['authorized_capital'] = amount
                     else:
+                        # Default to paid-up capital if not specified
                         if not capital_info['paid_up_capital']:
                             capital_info['paid_up_capital'] = amount
                 except ValueError:
