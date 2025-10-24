@@ -81,21 +81,17 @@ class EntityExtractor:
         auth_matches = re.finditer(authorized_pattern, text, re.IGNORECASE)
         for match in auth_matches:
             amount_str = match.group(1).replace(',', '')
-                try:
-                    amount = float(amount_str)
-                    # Only accept amounts in realistic capital range (> 100,000 QAR)
-                    if amount < 100000:
-                        continue
-                    if 'paid' in match.group(0).lower():
-                        capital_info['paid_up_capital'] = amount
-                    elif 'authorized' in match.group(0).lower():
-                        capital_info['authorized_capital'] = amount
-                    else:
-                        # Default to paid-up capital if not specified
-                        if not capital_info['paid_up_capital']:
-                            capital_info['paid_up_capital'] = amount
-                except ValueError:
-                    continue
+            # Extract authorized capital
+        auth_matches = re.finditer(authorized_pattern, text, re.IGNORECASE)
+        for match in auth_matches:
+            amount_str = match.group(1).replace(',', '')
+            try:
+                amount = float(amount_str)
+                if amount >= 100000:  # Realistic minimum
+                    capital_info['authorized_capital'] = amount
+                    break  # Take first match
+            except ValueError:
+                continue
         
         return capital_info if any(capital_info.values()) else None
     
