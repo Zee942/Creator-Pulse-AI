@@ -56,23 +56,31 @@ class EntityExtractor:
     @staticmethod
     def extract_capital(text: str) -> Optional[Dict]:
         """Extract capital information"""
-        # Pattern to match capital amounts in QAR
-        patterns = [
-            r'(?:paid[\s-]?up|authorized)\s+capital[:\s]+(?:QAR|qar)?\s*([\d,]+(?:\.\d+)?)',
-            r'capital[:\s]+(?:QAR|qar)?\s*([\d,]+(?:\.\d+)?)',
-            r'QAR\s*([\d,]+(?:\.\d+)?).*?(?:paid[\s-]?up|authorized|capital)',
-            r'(?:QAR|qar)\s*([\d,]+(?:\.\d+)?)\s*\([^)]*(?:million|riyal)[^)]*\)'  # Matches "QAR 5,000,000 (Five Million)"
-        ]
-        
         capital_info = {
             'authorized_capital': None,
             'paid_up_capital': None
         }
         
-        for pattern in patterns:
-            matches = re.finditer(pattern, text, re.IGNORECASE)
-            for match in matches:
-                amount_str = match.group(1).replace(',', '')
+        # More specific patterns for paid-up and authorized capital
+        paid_up_pattern = r'paid[\s-]?up\s+capital[:\s]+(?:was\s+)?(?:QAR|qar)?\s*([\d,]+(?:\.\d+)?)'
+        authorized_pattern = r'authorized\s+(?:share\s+)?capital[:\s]+(?:is\s+)?(?:QAR|qar)?\s*([\d,]+(?:\.\d+)?)'
+        
+        # Extract paid-up capital
+        paid_matches = re.finditer(paid_up_pattern, text, re.IGNORECASE)
+        for match in paid_matches:
+            amount_str = match.group(1).replace(',', '')
+            try:
+                amount = float(amount_str)
+                if amount >= 100000:  # Realistic minimum
+                    capital_info['paid_up_capital'] = amount
+                    break  # Take first match
+            except ValueError:
+                continue
+        
+        # Extract authorized capital
+        auth_matches = re.finditer(authorized_pattern, text, re.IGNORECASE)
+        for match in auth_matches:
+            amount_str = match.group(1).replace(',', '')
                 try:
                     amount = float(amount_str)
                     # Only accept amounts in realistic capital range (> 100,000 QAR)
