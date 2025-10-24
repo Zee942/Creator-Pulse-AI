@@ -25,11 +25,11 @@ class GapAnalyzer:
                 'recommendation': 'Specify data storage locations and ensure compliance with Qatar residency requirements'
             }
         
-        # Check if Qatar is mentioned
-        qatar_found = any('qatar' in loc.lower() for loc in data_locations)
+        # Check if data is stored outside Qatar
+        # Any mention of non-Qatar locations is a violation
         non_qatar_locations = [loc for loc in data_locations if 'qatar' not in loc.lower()]
         
-        if non_qatar_locations and not qatar_found:
+        if non_qatar_locations:
             return {
                 'gap_id': 'GAP_DATA_001',
                 'article': '2.1.1',
