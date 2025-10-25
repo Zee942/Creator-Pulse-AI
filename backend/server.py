@@ -16,6 +16,17 @@ import tempfile
 from document_parser import DocumentParser, EntityExtractor
 from gap_analyzer import GapAnalyzer
 from scoring_engine import ScoringEngine, RecommendationEngine
+from semantic_mapper import SemanticMapper
+
+# Initialize semantic mapper (lazy loading)
+_semantic_mapper = None
+
+def get_semantic_mapper():
+    global _semantic_mapper
+    if _semantic_mapper is None:
+        logger.info("Initializing semantic mapper...")
+        _semantic_mapper = SemanticMapper()
+    return _semantic_mapper
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
