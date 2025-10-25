@@ -61,9 +61,9 @@ class EntityExtractor:
             'paid_up_capital': None
         }
         
-        # More specific patterns for paid-up and authorized capital
-        paid_up_pattern = r'paid[\s-]?up\s+capital[:\s]+(?:was\s+)?(?:QAR|qar)?\s*([\d,]+(?:\.\d+)?)'
-        authorized_pattern = r'authorized\s+(?:share\s+)?capital[:\s]+(?:is\s+)?(?:QAR|qar)?\s*([\d,]+(?:\.\d+)?)'
+        # More specific patterns - allow text between capital and QAR
+        paid_up_pattern = r'paid[\s-]?up\s+capital[:\s.]+[^Q]*?(?:QAR|qar)\s*([\d,]+)'
+        authorized_pattern = r'authorized\s+(?:share\s+)?capital[:\s.]+[^Q]*?(?:QAR|qar)\s*([\d,]+)'
         
         # Extract paid-up capital
         paid_matches = re.finditer(paid_up_pattern, text, re.IGNORECASE)
@@ -73,7 +73,7 @@ class EntityExtractor:
                 amount = float(amount_str)
                 if amount >= 100000:  # Realistic minimum
                     capital_info['paid_up_capital'] = amount
-                    break  # Take first match
+                    break
             except ValueError:
                 continue
         
@@ -81,15 +81,11 @@ class EntityExtractor:
         auth_matches = re.finditer(authorized_pattern, text, re.IGNORECASE)
         for match in auth_matches:
             amount_str = match.group(1).replace(',', '')
-            # Extract authorized capital
-        auth_matches = re.finditer(authorized_pattern, text, re.IGNORECASE)
-        for match in auth_matches:
-            amount_str = match.group(1).replace(',', '')
             try:
                 amount = float(amount_str)
-                if amount >= 100000:  # Realistic minimum
+                if amount >= 100000:
                     capital_info['authorized_capital'] = amount
-                    break  # Take first match
+                    break
             except ValueError:
                 continue
         
