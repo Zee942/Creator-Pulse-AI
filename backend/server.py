@@ -142,6 +142,13 @@ async def upload_documents(
         # Extract entities
         entities = EntityExtractor.extract_all_entities(parsed_documents)
         
+        # Perform semantic analysis (RAG)
+        logger.info("Performing semantic regulatory mapping...")
+        semantic_mapper = get_semantic_mapper()
+        combined_text = "\n\n".join(parsed_documents.values())
+        semantic_analysis = semantic_mapper.analyze_document_semantically(combined_text)
+        relevant_articles = semantic_mapper.get_relevant_articles_for_entities(entities)
+        
         # Analyze gaps
         gaps = GapAnalyzer.analyze_all_gaps(entities)
         
