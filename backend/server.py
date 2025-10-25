@@ -155,6 +155,17 @@ async def upload_documents(
         # Calculate score
         score = ScoringEngine.calculate_overall_score(gaps)
         
+        # Hybrid vetting: Flag for expert review if score is critically low
+        needs_expert_review = score['overall_score'] < 50 or score['high_severity_gaps'] >= 3
+        expert_review_reason = None
+        if needs_expert_review:
+            if score['overall_score'] < 25:
+                expert_review_reason = "Critical readiness score - comprehensive expert review required"
+            elif score['high_severity_gaps'] >= 4:
+                expert_review_reason = f"Multiple high-severity gaps detected ({score['high_severity_gaps']} gaps)"
+            else:
+                expert_review_reason = "Low readiness score - expert validation recommended"
+        
         # Get recommendations
         recommendations = RecommendationEngine.get_all_recommendations(gaps)
         
