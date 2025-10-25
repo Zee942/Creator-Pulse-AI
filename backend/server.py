@@ -163,6 +163,10 @@ async def upload_documents(
             "assessment_id": assessment_id,
             "startup_name": assessment['startup_name'],
             "entities": entities,
+            "semantic_analysis": {
+                "article_matches": semantic_analysis,
+                "relevant_articles": relevant_articles
+            },
             "gaps": gaps,
             "score": score,
             "recommendations": recommendations,
