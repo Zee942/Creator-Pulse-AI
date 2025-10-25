@@ -181,6 +181,11 @@ async def upload_documents(
             "gaps": gaps,
             "score": score,
             "recommendations": recommendations,
+            "hybrid_vetting": {
+                "needs_expert_review": needs_expert_review,
+                "review_reason": expert_review_reason,
+                "confidence_level": "HIGH" if score['overall_score'] > 70 else "MEDIUM" if score['overall_score'] > 40 else "LOW"
+            },
             "documents_analyzed": uploaded_files,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "completed_at": datetime.now(timezone.utc).isoformat()
